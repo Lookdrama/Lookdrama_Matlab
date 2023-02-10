@@ -1,0 +1,42 @@
+clc
+clear
+load data  
+%算法第1步：归一化
+%mapminmax函数对行进行处理，需要将数据进行转置
+[x,mapping] = mapminmax(data');
+%因为数据中含有0的数字，为了分母有理化进行范围规定
+mapping.ymin = 0.002;
+mapping.ymax = 0.996;
+mapping.yrange = mapping.ymax-mapping.ymin;
+data = mapminmax(data',mapping);
+data = data';
+%算法所需矩阵初始化，提高计算速度
+[row,column] = size(data);
+p = zeros(row,column);  %比重
+e = zeros(1,column);  %每一项的熵值
+d = ones(1,column); %信息熵冗余度
+w = zeros(1,column); %各项指标权值
+
+
+%算法第2步：每个属性的所有值做分母，单个值作为分子，形成比重矩阵
+for j = 1:column
+    sum_column = sum(data(:,j));
+    for i = 1:row
+        p(i,j) = data(i,j)/sum_column;
+    end
+end
+%算法第3步：根据公式进行计算
+k = 1 / log(row);
+for i = 1:column
+    e(i) = -k*sum(p(:,i).*log(p(:,i)));
+end
+%算法第4步:计算信息熵冗余度
+d = d - e;
+%算法第5步：计算各项指标的权值
+w = d./sum(d);
+
+
+
+
+
+
